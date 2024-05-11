@@ -61,7 +61,7 @@ public class PlayerBall : MonoBehaviour
             else
             {
                 //Restart..
-                SceneManager.LoadScene("Example1_" + manager.stage);
+                SceneManager.LoadScene("Example1_" + manager.stage.ToString());
             }
         }
     }
