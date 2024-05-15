@@ -5,40 +5,77 @@ using UnityEngine.SceneManagement;
 
 public class PlayerBall : MonoBehaviour
 {
-    public float jumpPower;
+    public float speed;
+    float hAxis;
+    float vAxis;
+    bool wDown;
+    bool jDown;
     public int itemCount;
     public GameMangerLogic manager;
 
     bool isJump;
+
+    Vector3 moveVec;
+
     Rigidbody rigid;
     AudioSource audio;
+    Animator anim;
 
     void Awake()
     {
-        isJump = false;
         rigid = GetComponent<Rigidbody>();
+        anim = GetComponentInChildren<Animator>();
         audio = GetComponent<AudioSource>();
     }
 
-    private void Update() // jump
+    void Update() // jump
     {
-        if (Input.GetButtonDown("Jump") && !isJump)
-        {
-            isJump = true;
-            rigid.AddForce(new Vector3(0, jumpPower, 0), ForceMode.Impulse);
-        }
-    }
-    void FixedUpdate() // move
-    {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-        rigid.AddForce(new Vector3(h, 0, v), ForceMode.Impulse);
+        GetInput();
+        Move();
+        Turn();
+        Jump();
     }
 
-    void OnCollisionEnter(Collision collision) // jump boolean trigger
+    void GetInput()
     {
-        if(collision.gameObject.tag == "Floor")
+        hAxis = Input.GetAxisRaw("Horizontal");
+        vAxis = Input.GetAxisRaw("Vertical");
+        wDown = Input.GetButton("Walk");
+        jDown = Input.GetButtonDown("Jump");
+    }
+
+    void Move()
+    {
+        moveVec = new Vector3(hAxis, 0, vAxis).normalized;
+
+        transform.position += moveVec * speed * (wDown ? 0.3f : 1f) * Time.deltaTime;
+
+        anim.SetBool("isRun", moveVec != Vector3.zero);
+        anim.SetBool("isWalk", wDown);
+
+    }
+
+    void Turn()
+    {
+        transform.LookAt(transform.position + moveVec);
+    }
+
+    void Jump()
+    {
+        if (jDown && !isJump)
         {
+            rigid.AddForce(Vector3.up * 5, ForceMode.Impulse);
+            anim.SetBool("isJump", true);
+            anim.SetTrigger("doJump");
+            isJump = true;
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Floor")
+        {
+            anim.SetBool("isJump", false);
             isJump = false;
         }
     }
