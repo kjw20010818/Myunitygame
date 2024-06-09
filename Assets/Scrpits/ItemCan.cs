@@ -7,7 +7,7 @@ public class ItemCans : MonoBehaviour
     public float rotateSpeed;
 
 
-    void Update()
+    void Update() // 아이템 회전
     {
         transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime, Space.World);
     }
